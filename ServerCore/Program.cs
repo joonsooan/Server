@@ -1,51 +1,32 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace ServerCore
+﻿namespace ServerCore
 {
-    class Program
+    internal class Program
     {
-        static void MainThread(object state)
+        private static volatile bool _stop = false;
+
+        private static void ThreadMain()
         {
-            for ( int i = 0; i < 5; i++ )
-            { 
-                Console.WriteLine("Hello Thread");
+            Console.WriteLine("쓰레드 시작");
+            while (_stop == false)
+            {
+                // stop 신호를 기다림
             }
+            Console.WriteLine("쓰레드 종료");
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            ThreadPool.SetMinThreads(1, 1); // 최소 쓰레드: 1개
-            ThreadPool.SetMaxThreads(5, 5); // 최대 쓰레드: 5개
+            Task t = new Task(ThreadMain);
+            t.Start();
 
-            for (int i = 0; i < 5; i++)
-            {
-                Task t = new Task(() => { while (true) { } }, TaskCreationOptions.LongRunning);
-                t.Start();
-            }
+            Thread.Sleep(1000);
 
-            //for ( int i = 0; i < 4; i++) // i < 5 이면 쓰레드 5개를 모두 사용, ThreadPool.QueueUserWorkItem(MainThread)이 실행 안됨
-            //{
-            //    ThreadPool.QueueUserWorkItem((obj) => { while (true) { } }); // 무한 루프를 돌림
-            //}
+            _stop = true;
 
-            ThreadPool.QueueUserWorkItem(MainThread);
-
-            //Thread t = new Thread(MainThread);
-            //t.Name = "Test Thread";
-            //t.IsBackground = true;
-            //t.Start();
-
-            //Console.WriteLine("Waiting for Thread");
-
-            //t.Join();
-            //Console.WriteLine("Hello World");
-
-            while (true)
-            {
-
-            }
+            Console.WriteLine("Stop 호출");
+            Console.WriteLine("종료 대기중");
+            t.Wait();
+            Console.WriteLine("종료 성공");
         }
     }
 }
