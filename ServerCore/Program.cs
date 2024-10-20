@@ -3,17 +3,28 @@
     internal class Program
     {
         private static int number = 0;
+        private static object _obj = new object();
 
         private static void Thread_1()
         {
             for (int i = 0; i < 100000; i++)
-                Interlocked.Increment(ref number);
+            {
+                lock (_obj)
+                {
+                    number++;
+                }
+            }
         }
 
         private static void Thread_2()
         {
             for (int i = 0; i < 100000; i++)
-                Interlocked.Decrement(ref number);
+            {
+                lock (_obj)
+                {
+                    number--;
+                }
+            }
         }
 
         private static void Main(string[] args)
